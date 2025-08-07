@@ -1,0 +1,61 @@
+{
+  "name": "tosch-hl7",
+  "version": "1.0.0",
+  "description": "A TypeScript/JavaScript library to work with HL7 messages in a simple and intuitive way. Features optimized internal structure, consistent 1-based indexing, field modification, and minimal optional chaining.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepare": "npm run clean && npm run build",
+    "test": "node -e \"console.log('Testing basic import...'); const { HL7Message } = require('./dist'); console.log('✅ Library loads successfully');\"",
+    "example": "ts-node src/example.ts",
+    "dev": "nodemon src/example.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "hl7",
+    "healthcare",
+    "medical",
+    "parser",
+    "typescript",
+    "javascript",
+    "message",
+    "segment",
+    "field",
+    "component",
+    "health-informatics",
+    "interoperability"
+  ],
+  "author": {
+    "name": "Gastón Tognola",
+    "email": "your-email@example.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/tosch-hl7.git"
+  },
+  "homepage": "https://github.com/your-username/tosch-hl7#readme",
+  "bugs": {
+    "url": "https://github.com/your-username/tosch-hl7/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^24.2.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
