@@ -3,7 +3,7 @@ src/
 tsconfig.json
 
 # Demo and example files (exclude from published package)
-dist/demo-*
+dist/demo-no-conversion.*
 dist/example.*
 dist/final-demo.*
 
