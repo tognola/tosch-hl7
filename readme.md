@@ -11,11 +11,10 @@ A TypeScript/JavaScript library to work with HL7 messages in a simple and intuit
 - ✅ Direct access using `[]` operator (`message.PID[5]`)
 - ✅ **Field modification and creation**: Both `[]` and `set()` methods support writing
 - ✅ **Consistent 1-based indexing**: Same numbering for both access methods
-- ✅ **Reduced optional chaining**: Fields return `null` instead of requiring `?.` everywhere
 - ✅ Segment search by name
 - ✅ Support for field components and subcomponents
 - ✅ Segment existence verification
-- ✅ **TypeScript friendly**: No type casting required
+- ✅ **TypeScript friendly**
 
 ## Installation
 
@@ -152,6 +151,24 @@ allSegments.forEach(segment => {
 });
 ```
 
+### 6. Get the Complete Message as Text
+
+```typescript
+// Convert the entire HL7 message to text in HL7 format
+const hl7Text = message.toString();
+console.log(hl7Text);
+```
+
+The `toString()` method returns the entire HL7 message as a string, with segments separated by `\r\n` (the HL7 standard).
+
+#### Example Output
+
+```
+MSH|^~\&|SYSTEM|HOSPITAL|LAB|HOSPITAL|20240101120000||ADT^A01|12345|P|2.4
+PID|1||123456789^^^HOSPITAL^MR||DOE^JOHN^MIDDLE||19800101|M|||123 MAIN ST^^ANYTOWN^ST^12345^USA||(555)123-4567|||S||987654321|||U
+PV1|1|I|ICU^101^1|||ATTENDING^DOCTOR^A|||SUR||||19|VIP|ATTENDING^DOCTOR^A
+```
+
 ## Practical Examples
 
 ### Extract Patient Information
@@ -239,7 +256,7 @@ if (message.PID) {
 
 ## Methods Comparison
 
-| Método | Sintaxis | Ejemplo | Resultado |
+| Method | Sintax | Example | Result |
 |--------|----------|---------|-----------|
 | `get()` | `get('SEGMENT-FIELD.COMPONENT.SUBCOMPONENT')` | `message.get('PID-5.1.2')` | `"Sub1"` |
 | `[]` | `['SEGMENT'][FIELD][COMPONENT][SUBCOMPONENT]` | `message['PID'][5][1][2]` | `"Sub1"` |
