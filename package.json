@@ -1,6 +1,6 @@
 {
   "name": "tosch-hl7",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A TypeScript/JavaScript library to work with HL7 messages in a simple and intuitive way. Features optimized internal structure, consistent 1-based indexing, field modification, and minimal optional chaining.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

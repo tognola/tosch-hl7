@@ -281,4 +281,12 @@ export class HL7Message {
 
         return result;
     }
+
+
+    /** * Convierte el mensaje HL7 a un string con formato
+     * @returns El mensaje HL7 como string
+     */
+    toString(): string {
+        return this.segments.map(segment => segment.toString()).join('\r\n');
+    }
 }

@@ -36,6 +36,10 @@ export class HL7Component {
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
                     // Convertir índice basado en 1 a basado en 0 para el array
+                    // Asegurar que el array tenga suficientes elementos
+                    while (target.subcomponents.length < index) {
+                        target.subcomponents.push('');
+                    }
                     target.subcomponents[index - 1] = value;
                     // Actualizar el valor string
                     target.value = target.subcomponents.join('&');
@@ -89,6 +93,10 @@ export class HL7Field {
             set(target, prop, value) {
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
+                    // Asegurar que el array tenga suficientes elementos
+                    while (target.components.length < index) {
+                        target.components.push('');
+                    }
                     target.components[index - 1] = value;
                     target.value = target.components.join('^');
                     return true;
@@ -144,6 +152,10 @@ export class Segment {
             set(target, prop, value) {
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
+                    // Asegurar que el array tenga suficientes elementos
+                    while (target.fields.length <= index) {
+                        target.fields.push('');
+                    }
                     target.fields[index] = value;
                     return true;
                 }
@@ -211,5 +223,13 @@ export class Segment {
         const subcomponents = component.split('&');
         // Convertir índice basado en 1 a basado en 0 para el array
         return subcomponents[subcomponentIndex - 1] || '';
+    }
+
+    /**
+     * Convierte el segmento a un string con formato HL7
+     * @returns El segmento como string
+     */
+    toString(): string {
+        return this.fields.join('|');
     }
 }

@@ -18,10 +18,10 @@ console.log('   Nombre:', message.get('PID-5.2'));
 console.log('   Segundo nombre:', message.get('PID-5.3'));
 
 console.log('\n2. Obtener información del mensaje (MSH):');
-console.log('   Aplicación emisora:', message.get('MSH-3'));
-console.log('   Fecha/hora del mensaje:', message.get('MSH-7'));
-console.log('   Tipo de mensaje:', message.get('MSH-9'));
-console.log('   ID del mensaje:', message.get('MSH-10'));
+console.log('   Aplicación emisora:', message.get('MSH-2')); // Field 2: SYSTEM
+console.log('   Fecha/hora del mensaje:', message.get('MSH-6')); // Field 6: 20240101120000
+console.log('   Tipo de mensaje:', message.get('MSH-8')); // Field 8: ADT^A01
+console.log('   ID del mensaje:', message.get('MSH-9')); // Field 9: 12345
 
 console.log('\n3. Obtener información demográfica (PID):');
 console.log('   ID del paciente:', message.get('PID-3'));
@@ -43,9 +43,9 @@ console.log('   Campo 7 del PID (fecha nacimiento):', message.PID?.[7]?.toString
 console.log('   Campo 8 del PID (sexo):', message.PID?.[8]?.toString());
 
 console.log('\n   Información del mensaje MSH:');
-console.log('   Campo 3 (aplicación emisora):', message.MSH?.[3]?.toString());
-console.log('   Campo 7 (fecha/hora):', message.MSH?.[7]?.toString());
-console.log('   Campo 9 (tipo mensaje):', message.MSH?.[9]?.toString());
+console.log('   Campo 2 (aplicación emisora):', message.MSH?.[2]?.toString()); // SYSTEM
+console.log('   Campo 6 (fecha/hora):', message.MSH?.[6]?.toString()); // 20240101120000
+console.log('   Campo 8 (tipo mensaje):', message.MSH?.[8]?.toString()); // ADT^A01
 
 console.log('\n   Información de visita PV1:');
 console.log('   Campo 2 (clase paciente):', message.PV1?.[2]?.toString());
@@ -90,11 +90,16 @@ if (message.PID) {
 }
 
 // Usar set para modificar campo, componente y subcomponente
-message.set('PID-6', 'NEWFIELD6');
+message.set('PID-6', 'COMP1^COMP2&SUB1&SUB2^COMP3');
 console.log('   Campo 6 del PID modificado con set:', message.PID?.[6]?.toString());
 message.set('PID-6.1', 'COMPONENT1');
-console.log('   Componente 1 del campo 6 modificado con set:', message.PID?.[6][1]?.toString());
-message.set('PID-6.1.2', 'SUBCOMP2');
-console.log('   Subcomponente 2 del componente 1 del campo 6 modificado con set:', message.PID?.[6][1][2]?.toString());
+console.log('   Componente 1 del campo 6 modificado con set:', message.PID?.[6]?.[1]?.toString());
+message.set('PID-6.2.2', 'SUBCOMP2');
+console.log('   Subcomponente 2 del componente 2 del campo 6 modificado con set:', message.PID?.[6]?.[2]?.[2]?.toString());
+
+
+// Mostrar el mensaje HL7 completo
+console.log('\n=== Mensaje HL7 completo ===');
+console.log(message.toString());
 
 console.log('\n=== Fin del ejemplo ===');

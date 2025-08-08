@@ -300,4 +300,4 @@ new HL7Message(rawHL7: string)
 
 ## License
 
-ISC
+MIT
