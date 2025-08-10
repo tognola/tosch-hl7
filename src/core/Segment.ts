@@ -1,32 +1,50 @@
-// Clase para representar un subcomponente
+/**
+ * Class representing a subcomponent.
+ */
 export class HL7Subcomponent {
+    /**
+     * Creates an instance of HL7Subcomponent.
+     * @param value The value of the subcomponent.
+     */
     constructor(private value: string) { }
 
+    /**
+     * Converts the subcomponent to a string.
+     */
     toString(): string {
         return this.value;
     }
 
+    /**
+     * Returns the primitive value of the subcomponent.
+     */
     valueOf(): string {
         return this.value;
     }
 }
 
-// Clase para representar un componente con acceso a subcomponentes
+/**
+ * Class representing a component with access to subcomponents.
+ */
 export class HL7Component {
     private subcomponents: string[];
 
+    /**
+     * Creates an instance of HL7Component.
+     * @param value The value of the component.
+     */
     constructor(private value: string) {
-        // Dividir por el separador de subcomponentes (&)
+        // Split by the subcomponent separator (&)
         this.subcomponents = value.split('&');
 
-        // Crear un proxy para acceso por índice a subcomponentes (índices basados en 1)
+        // Create a proxy for indexed access to subcomponents (1-based indices)
         return new Proxy(this, {
             get(target, prop) {
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
-                    // Convertir índice basado en 1 a basado en 0 para el array
+                    // Convert 1-based index to 0-based for the array
                     const subcomponent = target.subcomponents[index - 1];
-                    // Si no existe, devolver null en lugar de string vacío
+                    // Return null if the subcomponent does not exist
                     if (subcomponent === undefined) return null;
                     return new HL7Subcomponent(subcomponent || '');
                 }
@@ -35,13 +53,12 @@ export class HL7Component {
             set(target, prop, value) {
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
-                    // Convertir índice basado en 1 a basado en 0 para el array
-                    // Asegurar que el array tenga suficientes elementos
+                    // Ensure the array has enough elements
                     while (target.subcomponents.length < index) {
                         target.subcomponents.push('');
                     }
                     target.subcomponents[index - 1] = value;
-                    // Actualizar el valor string
+                    // Update the string value
                     target.value = target.subcomponents.join('&');
                     return true;
                 }
@@ -51,40 +68,59 @@ export class HL7Component {
         } as ProxyHandler<HL7Component>);
     }
 
+    /**
+     * Converts the component to a string.
+     */
     toString(): string {
         return this.value;
     }
 
+    /**
+     * Returns the primitive value of the component.
+     */
     valueOf(): string {
         return this.value;
     }
 
+    /**
+     * Retrieves all subcomponents as strings.
+     */
     getSubcomponents(): string[] {
         return this.subcomponents;
     }
 
+    /**
+     * Retrieves a specific subcomponent by index.
+     * @param index The 1-based index of the subcomponent.
+     */
     getSubcomponent(index: number): string {
-        // Convertir índice basado en 1 a basado en 0 para el array
+        // Convert 1-based index to 0-based for the array
         return this.subcomponents[index - 1] || '';
     }
 }
 
-// Clase para representar un campo con acceso a componentes
+/**
+ * Class representing a field with access to components.
+ */
 export class HL7Field {
     private components: string[];
 
+    /**
+     * Creates an instance of HL7Field.
+     * @param value The value of the field.
+     */
     constructor(private value: string) {
-        // Dividir por el separador de componentes (^)
+        // Split by the component separator (^)
         this.components = value.split('^');
 
-        // Crear un proxy para acceso por índice a componentes (índices basados en 1)
+        // Create a proxy for indexed access to components (1-based indices)
         return new Proxy(this, {
             get(target, prop) {
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
-                    // Convertir índice basado en 1 a basado en 0 para el array
+                    // Convert 1-based index to 0-based for the array
                     const component = target.components[index - 1];
-                    // Si no existe, devolver null en lugar de string vacío
+                    // Return null if the component does not exist
                     if (component === undefined) return null;
                     return new HL7Component(component || '');
                 }
@@ -93,7 +129,7 @@ export class HL7Field {
             set(target, prop, value) {
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
-                    // Asegurar que el array tenga suficientes elementos
+                    // Ensure the array has enough elements
                     while (target.components.length < index) {
                         target.components.push('');
                     }
@@ -107,52 +143,72 @@ export class HL7Field {
         } as ProxyHandler<HL7Field>);
     }
 
+    /**
+     * Converts the field to a string.
+     */
     toString(): string {
         return this.value;
     }
 
+    /**
+     * Returns the primitive value of the field.
+     */
     valueOf(): string {
         return this.value;
     }
 
+    /**
+     * Retrieves all components as strings.
+     */
     getComponents(): string[] {
         return this.components;
     }
 
+    /**
+     * Retrieves a specific component by index.
+     * @param index The 1-based index of the component.
+     */
     getComponent(index: number): string {
-        // Convertir índice basado en 1 a basado en 0 para el array
+        // Convert 1-based index to 0-based for the array
         return this.components[index - 1] || '';
     }
 }
 
+/**
+ * Class representing a segment with access to fields.
+ */
 export class Segment {
     private fields: string[];
     private name: string;
 
+    /**
+     * Creates an instance of Segment.
+     * @param line The raw HL7 segment line.
+     */
     constructor(line: string) {
-        // Dividir la línea por el separador de campos (|)
+        // Split the line by the field separator (|)
         this.fields = line.split('|');
-        // El nombre del segmento es el primer campo (índice 0)
+        // The segment name is the first field (index 0)
         this.name = this.fields[0] || '';
 
-        // Crear un proxy para soportar el acceso por índice con []
+        // Create a proxy to support indexed access with []
         return new Proxy(this, {
             get(target, prop) {
-                // Si es un número, devolver el campo correspondiente como HL7Field
+                // If it is a number, return the corresponding field as HL7Field
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
                     const fieldValue = target.getField(index);
-                    // Si no existe el campo, devolver null
+                    // Return null if the field does not exist
                     if (!fieldValue) return null;
                     return new HL7Field(fieldValue);
                 }
-                // Para cualquier otra propiedad, usar el comportamiento normal
+                // For any other property, use the normal behavior
                 return target[prop as keyof Segment];
             },
             set(target, prop, value) {
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
-                    // Asegurar que el array tenga suficientes elementos
+                    // Ensure the array has enough elements
                     while (target.fields.length <= index) {
                         target.fields.push('');
                     }
@@ -166,28 +222,30 @@ export class Segment {
     }
 
     /**
-     * Obtiene el nombre del segmento
+     * Retrieves the name of the segment.
      */
     getName(): string {
         return this.name;
     }
 
     /**
-     * Obtiene todos los campos del segmento
+     * Retrieves all fields of the segment.
      */
     getFields(): string[] {
         return this.fields;
     }
 
     /**
-     * Obtiene un campo específico por índice (string plano para compatibilidad)
+     * Retrieves a specific field by index (plain string for compatibility).
+     * @param index The 1-based index of the field.
      */
     getField(index: number): string {
         return this.fields[index] || '';
     }
 
     /**
-     * Obtiene un campo como objeto HL7Field para acceso avanzado
+     * Retrieves a field as an HL7Field object for advanced access.
+     * @param index The 1-based index of the field.
      */
     getFieldObject(index: number): HL7Field {
         const fieldValue = this.getField(index);
@@ -195,39 +253,39 @@ export class Segment {
     }
 
     /**
-     * Obtiene un componente específico de un campo
-     * @param fieldIndex Índice del campo
-     * @param componentIndex Índice del componente dentro del campo (basado en 1)
+     * Retrieves a specific component of a field.
+     * @param fieldIndex The 1-based index of the field.
+     * @param componentIndex The 1-based index of the component within the field.
      */
     getComponent(fieldIndex: number, componentIndex: number): string {
         const field = this.getField(fieldIndex);
         if (!field) return '';
 
-        // Dividir el campo por el separador de componentes (^)
+        // Split the field by the component separator (^)
         const components = field.split('^');
-        // Convertir índice basado en 1 a basado en 0 para el array
+        // Convert 1-based index to 0-based for the array
         return components[componentIndex - 1] || '';
     }
 
     /**
-     * Obtiene un subcomponente específico de un componente
-     * @param fieldIndex Índice del campo
-     * @param componentIndex Índice del componente (basado en 1)
-     * @param subcomponentIndex Índice del subcomponente (basado en 1)
+     * Retrieves a specific subcomponent of a component.
+     * @param fieldIndex The 1-based index of the field.
+     * @param componentIndex The 1-based index of the component.
+     * @param subcomponentIndex The 1-based index of the subcomponent.
      */
     getSubcomponent(fieldIndex: number, componentIndex: number, subcomponentIndex: number): string {
         const component = this.getComponent(fieldIndex, componentIndex);
         if (!component) return '';
 
-        // Dividir el componente por el separador de subcomponentes (&)
+        // Split the component by the subcomponent separator (&)
         const subcomponents = component.split('&');
-        // Convertir índice basado en 1 a basado en 0 para el array
+        // Convert 1-based index to 0-based for the array
         return subcomponents[subcomponentIndex - 1] || '';
     }
 
     /**
-     * Convierte el segmento a un string con formato HL7
-     * @returns El segmento como string
+     * Converts the segment to a string in HL7 format.
+     * @returns The segment as a string.
      */
     toString(): string {
         return this.fields.join('|');

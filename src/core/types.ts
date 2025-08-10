@@ -1,28 +1,48 @@
 import { Segment } from './Segment';
 
-// Tipos de utilidad para acceso tipado con operador []
-
-// Tipo que representa un subcomponente (solo lectura)
+/**
+ * Represents a subcomponent (read-only).
+ */
 export interface HL7SubcomponentAccess {
+    /** Converts the subcomponent to a string. */
     toString(): string;
+
+    /** Returns the primitive value of the subcomponent. */
     valueOf(): string;
 }
 
-// Tipo que representa un componente con acceso a subcomponentes (permite escritura)
+/**
+ * Represents a component with access to subcomponents (allows writing).
+ */
 export interface HL7ComponentAccess extends HL7SubcomponentAccess {
-    [index: number]: HL7SubcomponentAccess | null | any; // Puede devolver null si no existe
+    /** Access subcomponents by index. May return null if not present. */
+    [index: number]: HL7SubcomponentAccess | null | any;
+
+    /** Retrieves all subcomponents as strings. */
     getSubcomponents(): string[];
+
+    /** Retrieves a specific subcomponent by index. */
     getSubcomponent(index: number): string;
 }
 
-// Tipo que representa un campo con acceso a componentes (permite escritura)
+/**
+ * Represents a field with access to components (allows writing).
+ */
 export interface HL7FieldAccess extends HL7SubcomponentAccess {
-    [index: number]: HL7ComponentAccess | null | any; // Puede devolver null si no existe
+    /** Access components by index. May return null if not present. */
+    [index: number]: HL7ComponentAccess | null | any;
+
+    /** Retrieves all components as strings. */
     getComponents(): string[];
+
+    /** Retrieves a specific component by index. */
     getComponent(index: number): string;
 }
 
-// Tipo que extiende Segment para permitir acceso por índice a campos avanzados (permite escritura)
+/**
+ * Extends Segment to allow indexed access to advanced fields (allows writing).
+ */
 export type SegmentWithIndexAccess = Segment & {
-    [index: number]: HL7FieldAccess | null | any; // Puede devolver null si no existe
+    /** Access fields by index. May return null if not present. */
+    [index: number]: HL7FieldAccess | null | any;
 };
