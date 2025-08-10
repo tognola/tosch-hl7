@@ -315,6 +315,54 @@ new HL7Message(rawHL7: string)
 #### Operator Access
 - `segment[INDEX]` - Gets the field at the specified index
 
+## HL7Builder Class
+
+The `HL7Builder` class allows you to programmatically construct HL7 messages in a simple and intuitive way. This is especially useful when you need to generate HL7 messages dynamically.
+
+### Features
+- Add segments with fields, components, and subcomponents.
+- Automatically handles field separators and encoding characters for the `MSH` segment.
+- Ensures proper alignment of fields, even when some are empty.
+- Outputs a valid HL7 message string.
+
+### Example Usage
+
+```typescript
+import { HL7Builder } from 'tosch-hl7';
+
+const builder = new HL7Builder();
+const message = builder
+    .addSegment('MSH', {
+        9: 'ACK^A01',
+        10: 'MSGID12345',
+        11: 'P',
+        12: '2.3'
+    })
+    .addSegment('PID', {
+        3: '123456789',
+        5: 'DOE^JOHN'
+    })
+    .build();
+
+console.log(message.toString());
+```
+
+### Output
+```
+MSH|^~\&|||||||ACK^A01|MSGID12345|P|2.3
+PID||123456789|||DOE^JOHN
+```
+
+### Methods
+
+#### `addSegment(name: string, fields: { [key: number]: string }): HL7Builder`
+Adds a new segment to the HL7 message.
+- `name`: The name of the segment (e.g., `MSH`, `PID`).
+- `fields`: An object where keys are field indices (1-based) and values are the field values.
+
+#### `build(): HL7Message`
+Builds the HL7 message and returns an instance of `HL7Message`.
+
 ## License
 
 MIT
