@@ -333,13 +333,13 @@ import { HL7Builder } from 'tosch-hl7';
 const builder = new HL7Builder();
 const message = builder
     .addSegment('MSH', {
-        9: 'ACK^A01',
-        10: 'MSGID12345',
-        11: 'P',
-        12: '2.3'
+        8: 'ACK^A01',
+        9: 'MSGID12345',
+        10: 'P',
+        11: '2.3'
     })
     .addSegment('PID', {
-        3: '123456789',
+        2: '123456789',
         5: 'DOE^JOHN'
     })
     .build();

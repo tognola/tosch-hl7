@@ -28,12 +28,17 @@ export class HL7Subcomponent {
  */
 export class HL7Component {
     private subcomponents: string[];
+    private updateCallback?: (newValue: string) => void;
 
     /**
      * Creates an instance of HL7Component.
      * @param value The value of the component.
+     * @param updateCallback Optional callback to update the parent when this component changes.
      */
-    constructor(private value: string) {
+    constructor(private value: string, updateCallback?: (newValue: string) => void) {
+        if (updateCallback) {
+            this.updateCallback = updateCallback;
+        }
         // Split by the subcomponent separator (&)
         this.subcomponents = value.split('&');
 
@@ -60,6 +65,12 @@ export class HL7Component {
                     target.subcomponents[index - 1] = value;
                     // Update the string value
                     target.value = target.subcomponents.join('&');
+
+                    // Notify parent of the change
+                    if (target.updateCallback) {
+                        target.updateCallback(target.value);
+                    }
+
                     return true;
                 }
                 (target as any)[prop] = value;
@@ -104,12 +115,17 @@ export class HL7Component {
  */
 export class HL7Field {
     private components: string[];
+    private updateCallback?: (newValue: string) => void;
 
     /**
      * Creates an instance of HL7Field.
      * @param value The value of the field.
+     * @param updateCallback Optional callback to update the parent when this field changes.
      */
-    constructor(private value: string) {
+    constructor(private value: string, updateCallback?: (newValue: string) => void) {
+        if (updateCallback) {
+            this.updateCallback = updateCallback;
+        }
         // Split by the component separator (^)
         this.components = value.split('^');
 
@@ -122,7 +138,14 @@ export class HL7Field {
                     const component = target.components[index - 1];
                     // Return null if the component does not exist
                     if (component === undefined) return null;
-                    return new HL7Component(component || '');
+                    return new HL7Component(component || '', (newComponentValue: string) => {
+                        // Update this field's component and propagate the change
+                        target.components[index - 1] = newComponentValue;
+                        target.value = target.components.join('^');
+                        if (target.updateCallback) {
+                            target.updateCallback(target.value);
+                        }
+                    });
                 }
                 return target[prop as keyof HL7Field];
             },
@@ -134,7 +157,14 @@ export class HL7Field {
                         target.components.push('');
                     }
                     target.components[index - 1] = value;
+
                     target.value = target.components.join('^');
+
+                    // Notify parent of the change
+                    if (target.updateCallback) {
+                        target.updateCallback(target.value);
+                    }
+
                     return true;
                 }
                 (target as any)[prop] = value;
@@ -180,6 +210,7 @@ export class HL7Field {
 export class Segment {
     private fields: string[];
     private name: string;
+    private fieldObjects: Map<number, HL7Field> = new Map();
 
     /**
      * Creates an instance of Segment.
@@ -197,10 +228,25 @@ export class Segment {
                 // If it is a number, return the corresponding field as HL7Field
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
+
+                    // Check if we already have a cached HL7Field object
+                    if (target.fieldObjects.has(index)) {
+                        return target.fieldObjects.get(index);
+                    }
+
                     const fieldValue = target.getField(index);
                     // Return null if the field does not exist
-                    if (!fieldValue) return null;
-                    return new HL7Field(fieldValue);
+                    if (fieldValue === undefined) return null;
+
+                    // Create a new HL7Field with callback to update the original field
+                    const fieldObject = new HL7Field(fieldValue, (newValue: string) => {
+                        target.fields[index] = newValue;
+                    });
+
+                    // Cache the field object
+                    target.fieldObjects.set(index, fieldObject);
+
+                    return fieldObject;
                 }
                 // For any other property, use the normal behavior
                 return target[prop as keyof Segment];
@@ -208,11 +254,16 @@ export class Segment {
             set(target, prop, value) {
                 if (typeof prop === 'string' && /^\d+$/.test(prop)) {
                     const index = parseInt(prop, 10);
-                    // Ensure the array has enough elements
+                    // Convert 1-based HL7 field number to array index (field 1 = index 1, field 2 = index 2, etc.)
+                    // Ensure the array has enough elements (index 0 is segment name)
                     while (target.fields.length <= index) {
                         target.fields.push('');
                     }
                     target.fields[index] = value;
+
+                    // Clear the cached field object since the value changed
+                    target.fieldObjects.delete(index);
+
                     return true;
                 }
                 (target as any)[prop] = value;
@@ -236,25 +287,27 @@ export class Segment {
     }
 
     /**
-     * Retrieves a specific field by index (plain string for compatibility).
-     * @param index The 1-based index of the field.
+     * Retrieves a specific field by index.
+     * @param index The field index (1-based access, but Field 0 = segment name)
      */
-    getField(index: number): string {
-        return this.fields[index] || '';
+    getField(index: number): string | undefined {
+        // Field access: PID[1] = Field 1 = array[1], PID[2] = Field 2 = array[2]
+        // Field 0 = segment name = array[0], but accessed as PID[0] would be array[0]
+        return this.fields[index];
     }
 
     /**
      * Retrieves a field as an HL7Field object for advanced access.
-     * @param index The 1-based index of the field.
+     * @param index The field index.
      */
     getFieldObject(index: number): HL7Field {
         const fieldValue = this.getField(index);
-        return new HL7Field(fieldValue);
+        return new HL7Field(fieldValue || '');
     }
 
     /**
      * Retrieves a specific component of a field.
-     * @param fieldIndex The 1-based index of the field.
+     * @param fieldIndex The field index.
      * @param componentIndex The 1-based index of the component within the field.
      */
     getComponent(fieldIndex: number, componentIndex: number): string {
@@ -269,7 +322,7 @@ export class Segment {
 
     /**
      * Retrieves a specific subcomponent of a component.
-     * @param fieldIndex The 1-based index of the field.
+     * @param fieldIndex The field index.
      * @param componentIndex The 1-based index of the component.
      * @param subcomponentIndex The 1-based index of the subcomponent.
      */

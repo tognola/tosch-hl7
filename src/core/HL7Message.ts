@@ -26,6 +26,8 @@ export class HL7Message {
             segment = new Segment(segmentName + '|');
             this.parsedSegments[segmentName] = segment;
             (this as any)[segmentName] = segment;
+            // También agregarlo a la lista de segmentos
+            this.segments.push(segment);
         }
 
         if (!componentIndex) {
@@ -36,6 +38,8 @@ export class HL7Message {
         if (!subcomponentIndex) {
             // Campo y componente
             if (!segment[fieldIndex]) segment[fieldIndex] = '';
+            if (!segment[fieldIndex][componentIndex]) segment[fieldIndex][componentIndex] = '';
+            // Asignar el valor al componente
             segment[fieldIndex][componentIndex] = value;
             return;
         }
@@ -61,7 +65,7 @@ export class HL7Message {
         const match = path.match(pathRegex);
 
         if (!match || !match[1] || !match[2]) {
-            console.warn(`Invalid path format: ${path}. Expected format: 'SEGMENT-FIELD.COMPONENT.SUBCOMPONENT' (e.g., 'PID-5.1.2')`);
+            //console.warn(`Invalid path format: ${path}. Expected format: 'SEGMENT-FIELD.COMPONENT.SUBCOMPONENT' (e.g., 'PID-5.1.2')`);
             return null;
         }
 
@@ -125,7 +129,7 @@ export class HL7Message {
 
         // Si no se especifica componente, devolver el campo completo
         if (componentIndex === undefined) {
-            return segment.getField(fieldIndex);
+            return segment.getField(fieldIndex) || '';
         }
 
         // Si no se especifica subcomponente, devolver el componente completo

@@ -13,27 +13,22 @@ export class HL7Builder {
      */
     addSegment(name: string, fields: { [key: number]: string }): HL7Builder {
         const maxIndex = Math.max(...Object.keys(fields).map(key => parseInt(key, 10)));
-        const fieldArray: string[] = Array(maxIndex - 1).fill(''); // Initialize an array with empty strings
-        // Handle special case for MSH segment (field 1 is the field separator)
+        const fieldArray: string[] = Array(maxIndex).fill(''); // Initialize an array with empty strings
+        fieldArray[0] = name; // First element is the segment name
         if (name === 'MSH') {
-            fieldArray[0] = '^~\\&'; // Encoding characters
+            fieldArray[1] = '^~\\&'; // Encoding characters
         }
 
-        const values = Object.values(fields).map((value, index) => ({
-            value: value || '',  // Ensure no undefined values
-            pos: Number(Object.keys(fields)[index])
-        })); // Ensure no undefined values
 
-        values.forEach(({ value, pos }) => {
-            const index = pos - 2; // Convert to 0-based index
-            if (index < fieldArray.length) {
-                fieldArray[index] = value; // Assign value to the correct index
-            }
+
+        Object.keys(fields).forEach((key: string) => {
+            const index = parseInt(key, 10); // Convert to 0-based index
+            fieldArray[index] = fields[index] || '';
         });
 
 
         // Join fields with the pipe (|) delimiter and add to segments
-        const segment = `${name}|${fieldArray.join('|')}`;
+        const segment = `${fieldArray.join('|')}`;
         this.segments.push(segment);
 
         return this; // Enable method chaining

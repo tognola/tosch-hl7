@@ -7,14 +7,14 @@ describe('HL7Builder', () => {
         const builder = new HL7Builder();
         const message = builder
             .addSegment('MSH', {
-                9: 'ACK^A01',
-                10: 'MSGID12345',
-                11: 'P',
-                12: '2.3'
+                8: 'ACK^A01',
+                9: 'MSGID12345',
+                10: 'P',
+                11: '2.3'
             })
             .addSegment('MSA', {
-                2: 'AA',
-                3: 'MSG00001'
+                1: 'AA',
+                2: 'MSG00001'
             })
             .build();
 
@@ -29,12 +29,48 @@ describe('HL7Builder', () => {
         const builder = new HL7Builder();
         const message = builder
             .addSegment('PID', {
-                3: '123456789',
+                2: '123456789',
                 5: 'DOE^JOHN'
             })
             .build();
 
-        expect(message.toString()).toBe('PID||123456789||DOE^JOHN');
+        expect(message.toString()).toBe('PID||123456789|||DOE^JOHN');
+    });
+
+    it('should correctly parse a message created by the builder (round-trip test)', () => {
+        const originalData = {
+            patientId: 'PAT123',
+            lastName: 'García',
+            firstName: 'Elena'
+        };
+
+        // 1. Build
+        const builtMessage = new HL7Builder()
+            .addSegment('MSH', {
+                8: 'ACK^A01',
+                9: 'MSGID12345',
+                10: 'P',
+                11: '2.3'
+            })
+            .addSegment('PID', {
+                2: originalData.patientId,
+                5: `${originalData.lastName}^${originalData.firstName}`
+            })
+            .build();
+
+        // 2. Convert to string
+        const hl7String = builtMessage.toString();
+
+        // 3. Parse back
+        const parsedMessage = new HL7Message(hl7String);
+
+        //console.log('Parsed HL7 Message:', parsedMessage.toString());
+
+        // 4. Verify
+        expect(parsedMessage.toString()).toBe(builtMessage.toString());
+        expect(parsedMessage.PID?.[2].toString()).toBe(originalData.patientId);
+        expect(parsedMessage.get('PID-5.1')).toBe(originalData.lastName);
+        expect(parsedMessage.get('PID-5.2')).toBe(originalData.firstName);
     });
 });
 
