@@ -1,6 +1,6 @@
 {
   "name": "tosch-hl7",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A TypeScript/JavaScript library to work with HL7 messages in a simple and intuitive way. Features optimized internal structure, consistent 1-based indexing, field modification, and minimal optional chaining.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
     "build": "tsc",
     "clean": "rm -rf dist",
     "prepare": "npm run clean && npm run build",
-    "test": "node -e \"console.log('Testing basic import...'); const { HL7Message } = require('./dist'); console.log('✅ Library loads successfully');\"",
+    "test": "npx jest --config jest.config.js",
     "example": "ts-node src/example.ts",
     "dev": "nodemon src/example.ts",
     "prepublishOnly": "npm run build"

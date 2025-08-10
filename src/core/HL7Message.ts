@@ -277,7 +277,7 @@ export class HL7Message {
                         return segmentData[0];
                     }
 
-                    return segmentData || undefined;
+                    return segmentData || null;
                 }
                 // Para cualquier otra propiedad, usar el comportamiento normal
                 return target[prop as keyof HL7Message];

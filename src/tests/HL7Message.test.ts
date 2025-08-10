@@ -27,7 +27,7 @@ PID|1|123456789||DOE^JOHN^M||19800101|M`;
             const singleSegment = 'MSH|^~\\&|SENDER|SENDFAC|RECEIVER|RECFAC|20230810120000||ADT^A01|MSG001|P|2.3';
             const message = new HL7Message(singleSegment);
             expect(message.MSH).toBeDefined();
-            expect(message.PID).toBeUndefined();
+            expect(message.PID).toBeNull();
         });
     });
 
@@ -52,9 +52,9 @@ PID|1|123456789||DOE^JOHN^M||19800101|M`;
             expect(message['OBX']).toBeDefined();
         });
 
-        it('should return undefined for non-existent segments', () => {
-            expect(message.EVN).toBeUndefined();
-            expect(message['NK1']).toBeUndefined();
+        it('should return null for non-existent segments', () => {
+            expect(message.EVN).toBeNull();
+            expect(message['NK1']).toBeNull();
         });
     });
 
