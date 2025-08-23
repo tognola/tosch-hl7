@@ -1,6 +1,6 @@
 {
   "name": "tosch-hl7",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "A TypeScript/JavaScript library to work with HL7 messages in a simple and intuitive way. Features optimized internal structure, consistent 1-based indexing, field modification, and minimal optional chaining.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,7 +20,8 @@
     "test": "npx jest --config jest.config.js",
     "example": "ts-node src/example.ts",
     "dev": "nodemon src/example.ts",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "docs": "npx typedoc --out docs src"
   },
   "keywords": [
     "hl7",
@@ -62,6 +63,7 @@
     "nodemon": "^3.1.10",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
+    "typedoc": "^0.28.10",
     "typescript": "^5.9.2"
   }
 }
