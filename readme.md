@@ -2,6 +2,10 @@
 
 A TypeScript/JavaScript library to work with HL7 messages in a simple and intuitive way.
 
+## Documentation
+
+📖 **[View Complete API Documentation](https://tognola.github.io/tosch-hl7/)**
+
 ## Features
 
 - ✅ Automatic HL7 message parsing
