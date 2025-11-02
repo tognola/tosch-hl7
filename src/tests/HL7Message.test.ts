@@ -185,6 +185,12 @@ PID|1|123456789||DOE^JOHN^M||19800101|M`;
             message = new HL7Message(sampleHL7);
         });
 
+        it('should set values in repeated segments using indexed path', () => {
+            message.set('OBX[1]-5', '80');
+            expect(message.get('OBX[0]-5')).toBe('180');
+            expect(message.get('OBX[1]-5')).toBe('80');
+        });
+
         it('should set field values using path notation', () => {
             message.set('PID-2', 'NEWID123');
             expect(message.get('PID-2')).toBe('NEWID123');
@@ -278,6 +284,11 @@ PID|1|123456789||DOE^JOHN^M||19800101|M`;
             expect(message.PID?.[10][1][1].toString()).toBe('123 MAIN ST');
             expect(message.PID?.[10][3][1].toString()).toBe('ANYTOWN');
             expect(message.PID?.[10][4][1].toString()).toBe('NY');
+        });
+
+        it('should access repeated segments by index', () => {
+            expect(message.OBX[0][5].toString()).toBe('180');
+            expect(message.OBX[1][5].toString()).toBe('75');
         });
 
         it('should return null for non-existent fields', () => {
