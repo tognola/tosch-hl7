@@ -119,8 +119,9 @@ console.log(message.get('PID-5.3')); // "MIDDLE"
 console.log(message.get('PID-8')); // "M" (sex)
 console.log(message.get('MSH-9')); // "ADT^A01" (message type)
 
-// For multiple segments, gets the first one
-console.log(message.get('OBX-5')); // Content of the first observation
+// Access repeated segments by index
+console.log(message.get('OBX[0]-5')); // Content of the first observation
+console.log(message.get('OBX[1]-5')); // Content of the second observation
 ```
 
 ### 4. `[]` Operator - Direct Access
@@ -135,8 +136,9 @@ console.log(message.PID[5].toString()); // "DOE^JOHN^MIDDLE"
 console.log(message.PID[8].toString()); // "M"
 console.log(message.MSH[9].toString()); // "ADT^A01"
 
-// For multiple segments, accesses the first one automatically
-console.log(message.OBX[5].toString()); // Content of the first observation
+// Access repeated segments by index
+console.log(message.OBX[0][5].toString()); // Content of the first observation
+console.log(message.OBX[1][5].toString()); // Content of the second observation
 
 // Check existence with optional chaining
 console.log(message.NK1?.[1]); // undefined if NK1 doesn't exist

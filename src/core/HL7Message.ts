@@ -14,21 +14,22 @@ export class HL7Message {
         const pathParts = this.parsePath(path);
         if (!pathParts) return;
 
-        const { segmentName, fieldIndex, componentIndex, subcomponentIndex } = pathParts;
+        const { segmentName, fieldIndex, componentIndex, subcomponentIndex, segmentIndex } = pathParts;
         let segmentData = this.parsedSegments[segmentName];
         let segment: any;
+
         if (Array.isArray(segmentData)) {
-            segment = segmentData[0];
+            segment = segmentData[segmentIndex ?? 0];
         } else if (segmentData) {
             segment = segmentData;
         } else {
-            // Si el segmento no existe, crearlo
             segment = new Segment(segmentName + '|');
             this.parsedSegments[segmentName] = segment;
             (this as any)[segmentName] = segment;
-            // También agregarlo a la lista de segmentos
             this.segments.push(segment);
         }
+
+        if (!segment) return;
 
         if (!componentIndex) {
             // Solo campo
@@ -59,35 +60,38 @@ export class HL7Message {
         fieldIndex: number;
         componentIndex?: number;
         subcomponentIndex?: number;
+        segmentIndex?: number;
     } | null {
-        // Formato esperado: 'PID-5.1.2' o 'PID-5.1' o 'PID-5' o 'PV1-2.1'
-        const pathRegex = /^([A-Z]{2,3}[0-9]?)-(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
+        // Updated format: 'PID[0]-5.1.2' or 'PID-5.1'
+        const pathRegex = /^([A-Z]{2,3}[0-9]?)(\[(\d+)\])?-(\d+)(?:\.(\d+))?(?:\.(\d+))?$/;
         const match = path.match(pathRegex);
 
-        if (!match || !match[1] || !match[2]) {
-            //console.warn(`Invalid path format: ${path}. Expected format: 'SEGMENT-FIELD.COMPONENT.SUBCOMPONENT' (e.g., 'PID-5.1.2')`);
+        if (!match || !match[1] || !match[4]) {
             return null;
         }
 
         const segmentName = match[1];
-        const fieldIndex = parseInt(match[2], 10);
+        const segmentIndex = match[3] ? parseInt(match[3], 10) : 0;
+        const fieldIndex = parseInt(match[4], 10);
 
         const result: {
             segmentName: string;
             fieldIndex: number;
             componentIndex?: number;
-            subcomponentIndex?: number
+            subcomponentIndex?: number;
+            segmentIndex: number;
         } = {
             segmentName,
+            segmentIndex,
             fieldIndex
         };
 
-        if (match[3]) {
-            result.componentIndex = parseInt(match[3], 10);
+        if (match[5]) {
+            result.componentIndex = parseInt(match[5], 10);
         }
 
-        if (match[4]) {
-            result.subcomponentIndex = parseInt(match[4], 10);
+        if (match[6]) {
+            result.subcomponentIndex = parseInt(match[6], 10);
         }
 
         return result;
@@ -107,21 +111,16 @@ export class HL7Message {
      * @returns The value at the specified path
      */
     get(path: string): string {
-        // Parsear el path
         const pathParts = this.parsePath(path);
         if (!pathParts) return '';
 
-        const { segmentName, fieldIndex, componentIndex, subcomponentIndex } = pathParts;
-
-        // Buscar el segmento en el objeto parseado
+        const { segmentName, fieldIndex, componentIndex, subcomponentIndex, segmentIndex } = pathParts;
         const segmentData = this.parsedSegments[segmentName];
 
         let segment: Segment | undefined;
         if (Array.isArray(segmentData)) {
-            // Si es un array, tomar el primer elemento
-            segment = segmentData[0];
+            segment = segmentData[segmentIndex ?? 0];
         } else {
-            // Si es un segmento único
             segment = segmentData;
         }
 
@@ -204,14 +203,7 @@ export class HL7Message {
     private assignSegmentProperties(): void {
         Object.keys(this.parsedSegments).forEach(segmentName => {
             const segmentData = this.parsedSegments[segmentName];
-
-            // Si es un array, asignar el primer elemento
-            if (Array.isArray(segmentData)) {
-                (this as any)[segmentName] = segmentData[0];
-            } else {
-                // Si es un segmento único, asignarlo directamente
-                (this as any)[segmentName] = segmentData;
-            }
+            (this as any)[segmentName] = segmentData;
         });
     }
 
@@ -268,18 +260,10 @@ export class HL7Message {
         // Crear un proxy para soportar el acceso por nombre de segmento con []
         return new Proxy(this, {
             get(target, prop) {
-                // Si es un string que parece un nombre de segmento HL7 (2-3 caracteres alfanuméricos mayúsculas)
                 if (typeof prop === 'string' && /^[A-Z]{2,3}[0-9]?$/.test(prop)) {
                     const segmentData = target.parsedSegments[prop];
-
-                    // Si es un array, devolver el primer elemento para compatibilidad con el acceso directo
-                    if (Array.isArray(segmentData)) {
-                        return segmentData[0];
-                    }
-
                     return segmentData || null;
                 }
-                // Para cualquier otra propiedad, usar el comportamiento normal
                 return target[prop as keyof HL7Message];
             }
         });
